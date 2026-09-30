@@ -1,0 +1,268 @@
+SQL Databases: A Practical Introduction
+
+1. Introduction to Relational Databases
+
+A relational database is a system for storing and organizing structured information in tables. A table contains rows and columns. Each row generally represents one record, while each column represents an attribute of that record. For example, a students table might contain student_id, name, email, and department columns.
+
+A relational database management system (RDBMS) provides tools for creating tables, inserting data, querying information, updating records, and controlling access. Common relational database systems include MySQL, PostgreSQL, Oracle Database, and Microsoft SQL Server.
+
+SQL, which stands for Structured Query Language, is used to communicate with relational databases. SQL allows developers to retrieve specific records, combine information from multiple tables, calculate aggregate values, and modify stored data.
+
+2. Tables, Rows, and Columns
+
+A database can contain many related tables. For example, an online learning application could have users, courses, enrollments, and payments tables.
+
+A column has a defined purpose and generally has a data type. Common SQL data types include integers, decimal values, strings, dates, and Boolean-like values depending on the database system.
+
+A row represents one record in a table. For example, a row in a users table could represent one registered user.
+
+Database constraints can be used to maintain data quality. Common constraints include NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK, and DEFAULT. Constraints help prevent invalid or inconsistent data from entering a table.
+
+3. Primary Keys
+
+A primary key uniquely identifies each row in a table. A primary key must contain unique values, and it normally cannot contain NULL.
+
+For example:
+
+CREATE TABLE users (
+    user_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(150)
+);
+
+Here, user_id identifies each user.
+
+A primary key can be a single column or, in some designs, a combination of columns. A good key should provide a reliable way to distinguish records.
+
+4. Foreign Keys
+
+A foreign key creates a relationship between tables. It refers to a primary key or another candidate key in a related table.
+
+For example, an orders table might contain customer_id. If customer_id references users.user_id, the database can enforce a relationship between an order and an existing user.
+
+Foreign keys help maintain referential integrity. They can prevent a record from referencing a parent record that does not exist, depending on the database constraints and operation being performed.
+
+5. Basic SELECT Queries
+
+The SELECT statement retrieves data from a database.
+
+Example:
+
+SELECT name, email
+FROM users;
+
+This query returns the name and email columns from the users table.
+
+To retrieve all columns, an asterisk can be used:
+
+SELECT *
+FROM users;
+
+However, selecting only the columns that are required is generally clearer and can avoid unnecessary data transfer.
+
+The WHERE clause filters rows.
+
+Example:
+
+SELECT name, email
+FROM users
+WHERE department = 'Computer Science';
+
+Only rows satisfying the condition are returned.
+
+6. ORDER BY
+
+The ORDER BY clause sorts query results.
+
+Example:
+
+SELECT name, salary
+FROM employees
+ORDER BY salary DESC;
+
+DESC sorts values in descending order, while ASC sorts values in ascending order.
+
+Multiple sorting columns can also be specified. For example, results can first be sorted by department and then by employee name.
+
+7. INSERT, UPDATE, and DELETE
+
+INSERT adds new records to a table.
+
+Example:
+
+INSERT INTO users (user_id, name, email)
+VALUES (101, 'Anita', 'anita@example.com');
+
+UPDATE modifies existing records.
+
+Example:
+
+UPDATE users
+SET email = 'new@example.com'
+WHERE user_id = 101;
+
+DELETE removes records.
+
+Example:
+
+DELETE FROM users
+WHERE user_id = 101;
+
+A WHERE clause is extremely important for UPDATE and DELETE operations when only specific rows should be changed or removed. Without an appropriate condition, an operation can affect many or all records.
+
+8. GROUP BY and Aggregate Functions
+
+SQL provides aggregate functions for calculations across multiple rows. Common aggregate functions include COUNT, SUM, AVG, MIN, and MAX.
+
+For example:
+
+SELECT department, COUNT(*)
+FROM employees
+GROUP BY department;
+
+This groups employees by department and counts the rows in each group.
+
+The HAVING clause filters groups after aggregation.
+
+Example:
+
+SELECT department, COUNT(*)
+FROM employees
+GROUP BY department
+HAVING COUNT(*) > 5;
+
+WHERE filters individual rows before grouping, while HAVING filters groups after aggregation.
+
+9. Joins
+
+Joins allow information from multiple tables to be combined.
+
+An INNER JOIN returns rows where the join condition matches in both tables.
+
+Example:
+
+SELECT users.name, orders.order_id
+FROM users
+INNER JOIN orders
+ON users.user_id = orders.user_id;
+
+A LEFT JOIN returns all rows from the left table and matching rows from the right table. If no match exists, columns from the right table can contain NULL.
+
+Example:
+
+SELECT users.name, orders.order_id
+FROM users
+LEFT JOIN orders
+ON users.user_id = orders.user_id;
+
+Other join types include RIGHT JOIN and, depending on the database system, FULL OUTER JOIN.
+
+10. Subqueries
+
+A subquery is a query nested inside another SQL statement.
+
+For example:
+
+SELECT name
+FROM employees
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM employees
+);
+
+The inner query calculates the average salary, and the outer query finds employees whose salary is greater than that average.
+
+Subqueries can appear in different parts of SQL statements. They can be useful when one query depends on the result of another query.
+
+11. Database Normalization
+
+Normalization is a database design approach that reduces unnecessary duplication and helps maintain data consistency.
+
+First Normal Form generally requires atomic values and avoids repeating groups.
+
+Second Normal Form builds on the first and addresses partial dependency when composite keys are involved.
+
+Third Normal Form further reduces dependencies where non-key attributes depend on other non-key attributes rather than directly on the key.
+
+For example, storing a customer's address repeatedly in every order record can create unnecessary duplication. Separating customers and orders into related tables can make updates easier and reduce inconsistent copies of the same information.
+
+12. Indexes
+
+An index is a database structure that can improve the speed of certain queries. Indexes are commonly created on columns frequently used for searching, joining, or sorting.
+
+For example:
+
+CREATE INDEX idx_users_email
+ON users(email);
+
+An index can make lookups faster, but indexes also have costs. They require storage and can increase the work required when rows are inserted, updated, or deleted.
+
+Indexes should therefore be created based on actual query and application requirements rather than adding indexes to every column.
+
+13. Transactions
+
+A transaction is a group of database operations treated as a logical unit.
+
+A transaction commonly follows the idea of ACID properties:
+
+Atomicity means the operations of a transaction are treated as a unit.
+
+Consistency means a successful transaction leaves the database satisfying its defined rules.
+
+Isolation concerns how concurrent transactions interact.
+
+Durability means committed changes should persist according to the database system's guarantees.
+
+For example, transferring money between two accounts may require one balance to decrease and another to increase. Both operations should be handled as one transaction so that the database does not remain in an unintended intermediate state.
+
+14. Parameterized Queries
+
+Applications should avoid constructing SQL queries by directly concatenating untrusted user input.
+
+Unsafe code can create SQL injection vulnerabilities.
+
+Instead, applications should use parameterized queries provided by their database library.
+
+For example, an application might conceptually use:
+
+SELECT * FROM users WHERE email = ?
+
+and provide the email value separately as a parameter.
+
+Parameterized queries allow the database driver to distinguish SQL structure from user-provided values.
+
+15. Database Security
+
+Database security includes controlling access, protecting credentials, validating input, and limiting privileges.
+
+Applications should not hard-code database passwords in source code that may be committed to a public repository. Environment variables or a secure secrets-management system can be used for configuration.
+
+Database accounts should have only the permissions required by the application. A web application that only needs to read and update certain tables should not automatically receive unrestricted administrative privileges.
+
+Sensitive information should also be handled carefully. Passwords should not be stored as plain text. Applications should use appropriate password hashing techniques and protect database credentials.
+
+16. Good SQL Practices
+
+Good SQL development includes using meaningful table and column names, selecting only required columns, using appropriate constraints, creating indexes based on actual needs, and writing queries that are easy to understand.
+
+Queries should be tested with realistic data and edge cases. Developers should also consider query performance when tables become large.
+
+When an application receives data from users, validation should happen before the data reaches business logic or database operations. Parameterized queries should be used for database operations involving external input.
+
+17. SQL in Application Development
+
+A backend application commonly sits between a user interface and a database. The application receives a request, validates the input, executes an appropriate database operation, and returns a response.
+
+For example, a registration endpoint might receive a username and email, validate them, insert a new user into a database, and return a success response.
+
+A well-designed application separates database operations from unrelated presentation logic. This separation makes the system easier to test, maintain, and modify.
+
+18. Summary
+
+Relational databases organize structured information using related tables. SQL provides commands for retrieving and modifying data, while constraints help protect data integrity. Primary keys identify records and foreign keys establish relationships.
+
+SELECT, WHERE, ORDER BY, GROUP BY, HAVING, joins, and subqueries provide flexible ways to retrieve information. INSERT, UPDATE, and DELETE modify stored records. Normalization helps reduce unnecessary duplication, while indexes can improve query performance.
+
+Transactions help applications perform related database operations reliably. Parameterized queries protect applications against SQL injection, and appropriate access control helps protect database resources.
+
+Understanding these concepts is important for backend developers because many web applications depend on databases for persistent storage.

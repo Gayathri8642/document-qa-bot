@@ -1,0 +1,448 @@
+Flask Web Development: A Practical Introduction
+
+1. Introduction to Flask
+
+Flask is a lightweight web framework for Python. It provides the basic components needed to build web applications and HTTP APIs while allowing developers to choose additional libraries for features such as database access, authentication, validation, and application structure.
+
+A Flask application receives an HTTP request, processes it through an appropriate route and application logic, and returns an HTTP response.
+
+Flask is often used for small web applications, backend services, REST APIs, prototypes, and applications where developers want direct control over the project structure.
+
+2. A Basic Flask Application
+
+A minimal Flask application can be written as:
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello, World!"
+
+if __name__ == "__main__":
+    app.run()
+
+The Flask() object represents the application. The route decorator associates a URL with a Python function.
+
+When a client requests the root URL, Flask calls the home function and returns its result as the response.
+
+3. Routes
+
+Routes define the URLs that an application responds to.
+
+For example:
+
+@app.route("/about")
+def about():
+    return "About page"
+
+The application can contain many routes, each responsible for a particular operation.
+
+Routes can also specify HTTP methods.
+
+Example:
+
+@app.route("/users", methods=["GET"])
+def users():
+    return "User list"
+
+By default, a Flask route responds to GET requests. Other methods such as POST, PUT, PATCH, and DELETE can be specified when needed.
+
+4. URL Parameters
+
+A route can contain a dynamic part.
+
+Example:
+
+@app.route("/users/<int:user_id>")
+def get_user(user_id):
+    return f"User ID: {user_id}"
+
+If the client requests /users/25, Flask passes 25 to the user_id parameter.
+
+Flask supports converters such as int, string, float, path, and UUID. Using a suitable converter can help ensure that the value received by the route has the expected form.
+
+5. Query Parameters
+
+Query parameters are values provided after a question mark in a URL.
+
+For example:
+
+/products?category=books
+
+Flask provides request.args for accessing query parameters.
+
+Example:
+
+from flask import request
+
+@app.route("/products")
+def products():
+    category = request.args.get("category")
+    return {"category": category}
+
+Query parameters are commonly used for filtering, searching, sorting, and pagination.
+
+6. Request Data
+
+Client requests can contain data in several forms. JSON request bodies are common in REST APIs.
+
+Example:
+
+from flask import request
+
+@app.route("/users", methods=["POST"])
+def create_user():
+    data = request.get_json()
+    return {"received": data}, 201
+
+The application should validate incoming data before using it.
+
+A request should not automatically be trusted simply because it was received by the server. Required fields, data types, lengths, and allowed values should be checked according to the application's requirements.
+
+7. Responses
+
+Flask can return strings, dictionaries, tuples, and response objects.
+
+For API development, JSON is commonly used.
+
+Example:
+
+from flask import jsonify
+
+@app.route("/api/status")
+def status():
+    return jsonify({
+        "status": "success",
+        "message": "API is running"
+    })
+
+A route can also return a status code.
+
+Example:
+
+return jsonify({"message": "Created"}), 201
+
+Returning meaningful HTTP status codes helps clients understand the result of their requests.
+
+8. Templates
+
+Flask can generate HTML using the Jinja template engine.
+
+Templates are usually stored in a templates directory.
+
+A route can render a template:
+
+from flask import render_template
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+Templates allow application data to be inserted into HTML pages.
+
+For example, a route can pass a variable to a template:
+
+return render_template("profile.html", username="Anita")
+
+The template can then display the username.
+
+9. Static Files
+
+Web applications often need CSS, JavaScript, and image files.
+
+Flask commonly serves these files from a static directory.
+
+A typical project may contain:
+
+project/
+    app.py
+    templates/
+        index.html
+    static/
+        css/
+            style.css
+        js/
+            app.js
+
+Separating templates and static resources keeps the project organized.
+
+10. Sessions
+
+A session allows an application to maintain information associated with a user's interaction across multiple requests.
+
+For example, after a successful login, an application may store information indicating that the user is authenticated.
+
+Flask provides a session object for this purpose.
+
+Example:
+
+from flask import session
+
+session["user_id"] = 25
+
+The application can later retrieve the value:
+
+user_id = session.get("user_id")
+
+Session configuration should be handled carefully because session data and the secret used to protect it have security implications.
+
+11. Cookies
+
+Cookies are small pieces of data associated with a website and stored by the browser.
+
+Cookies can be used for preferences, session-related information, and other application purposes.
+
+Flask provides functions for setting and reading cookies.
+
+Cookies containing sensitive information should be protected appropriately. Applications should consider security attributes such as Secure and HttpOnly where appropriate.
+
+12. Authentication
+
+Authentication verifies the identity of a user.
+
+A common Flask login process is:
+
+1. The user submits credentials.
+2. The application validates the input.
+3. The server looks up the account.
+4. The password is verified against a stored password hash.
+5. The application creates a session or issues an authentication token.
+6. Later requests use that authentication state.
+
+Passwords should never be stored as plain text. Password hashing libraries such as bcrypt can be used to store password hashes.
+
+13. Authorization
+
+Authorization determines what an authenticated user is allowed to do.
+
+For example, an application may have roles such as:
+
+- Admin
+- Entrepreneur
+- Investor
+
+An admin might be allowed to manage users, while an investor may only be allowed to view campaigns and make investments.
+
+Authorization checks should be performed on protected operations rather than relying only on the frontend to hide buttons.
+
+14. Flask and REST APIs
+
+Flask can be used to build REST APIs.
+
+For example:
+
+@app.route("/api/products", methods=["GET"])
+def get_products():
+    products = [
+        {"id": 1, "name": "Book"},
+        {"id": 2, "name": "Laptop"}
+    ]
+    return jsonify(products)
+
+The backend can retrieve the data from a database instead of storing it directly in the Python code.
+
+REST endpoints should use appropriate HTTP methods and status codes.
+
+15. Database Integration
+
+A Flask application often communicates with a relational database such as MySQL.
+
+A typical request flow is:
+
+Client
+    ↓
+Flask route
+    ↓
+Validation
+    ↓
+Business logic
+    ↓
+Database query
+    ↓
+Response
+
+The application should keep database operations organized rather than placing large amounts of SQL directly inside every route.
+
+Database connections should be managed carefully. Queries involving user input should use parameterized queries to reduce the risk of SQL injection.
+
+16. Flask-CORS
+
+CORS stands for Cross-Origin Resource Sharing.
+
+A frontend and backend may run on different origins during development.
+
+For example:
+
+Frontend:
+http://localhost:5173
+
+Backend:
+http://localhost:5000
+
+Browsers may block cross-origin requests unless the server allows the required origin through appropriate CORS configuration.
+
+Flask-CORS is a commonly used extension for configuring CORS in Flask applications.
+
+CORS should be configured according to the application's actual requirements rather than allowing unrestricted origins unnecessarily.
+
+17. Blueprints
+
+As a Flask application becomes larger, placing every route in one file can make the code difficult to maintain.
+
+Blueprints provide a way to organize related routes into separate modules.
+
+For example:
+
+project/
+    app.py
+    routes/
+        users.py
+        campaigns.py
+        authentication.py
+
+A users blueprint can contain user-related routes, while an authentication blueprint can contain login and registration routes.
+
+Blueprints help separate application responsibilities and make larger Flask applications easier to understand.
+
+18. Configuration
+
+Applications usually have configuration values such as:
+
+- Database URL
+- Secret key
+- API keys
+- Debug settings
+- Allowed frontend origins
+
+Sensitive configuration should not be hard-coded into source files that are committed to a repository.
+
+Environment variables can be used to provide configuration values.
+
+A .env file can be used locally, while a .env.example file can document which variables are required without exposing real credentials.
+
+19. Error Handling
+
+Flask allows applications to define error handlers.
+
+For example, a 404 handler can return a JSON response for an API:
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "error": "Resource not found"
+    }), 404
+
+Consistent error responses help frontend applications handle failures.
+
+Unexpected internal errors should not expose sensitive implementation details to users.
+
+Detailed information can instead be recorded in server logs for debugging.
+
+20. Logging
+
+Logging helps developers understand what an application is doing.
+
+Useful information may include:
+
+- Request processing events
+- Authentication events
+- Database errors
+- Validation failures
+- Unexpected exceptions
+
+Logs should not contain passwords, API keys, authentication tokens, or other sensitive information.
+
+Logging levels such as DEBUG, INFO, WARNING, ERROR, and CRITICAL can be used to categorize events.
+
+21. Flask Application Structure
+
+A simple Flask application might start with:
+
+project/
+    app.py
+    templates/
+    static/
+
+A larger backend can be organized into:
+
+project/
+    app.py
+    routes/
+    services/
+    models/
+    database/
+    utils/
+    templates/
+    static/
+    tests/
+
+The exact structure depends on project requirements. The main goal is to keep responsibilities separated so that routes, business logic, database operations, and utilities are easier to maintain and test.
+
+22. Testing Flask Applications
+
+Flask provides testing utilities that can be used with Python testing frameworks.
+
+Tests can create a test client and send requests to application routes without requiring a real browser.
+
+Important test cases include:
+
+- Successful GET requests
+- Valid POST requests
+- Invalid input
+- Missing required fields
+- Unauthorized requests
+- Forbidden operations
+- Missing resources
+- Database failures
+- Authentication behavior
+
+Testing both successful and unsuccessful paths helps identify defects before deployment.
+
+23. Deployment Considerations
+
+The Flask development server is intended for development and testing rather than production deployment.
+
+Production Flask applications are normally served through an appropriate WSGI server or deployment platform.
+
+Deployment configuration may include:
+
+- Environment variables
+- Database configuration
+- Logging
+- HTTPS
+- Process management
+- Reverse proxy configuration
+- Monitoring
+
+Production systems should avoid debug mode because detailed error information can expose internal application details.
+
+24. Security Practices
+
+Security should be considered throughout the Flask application.
+
+Important practices include:
+
+- Never store passwords as plain text.
+- Protect secret keys.
+- Validate incoming data.
+- Use parameterized database queries.
+- Apply authentication to protected routes.
+- Apply authorization to restricted operations.
+- Use HTTPS in production.
+- Avoid exposing sensitive information in errors.
+- Keep dependencies updated.
+- Do not commit API keys or passwords to Git.
+
+Security is not a single feature. It is a combination of safe application design, configuration, dependency management, and operational practices.
+
+25. Summary
+
+Flask provides a lightweight foundation for building Python web applications and APIs. Routes connect URLs and HTTP methods to Python functions, while request and response objects allow applications to communicate with clients.
+
+Flask supports dynamic URL parameters, query parameters, JSON responses, templates, sessions, cookies, and error handling. Authentication verifies identity, while authorization controls access to protected operations.
+
+Larger Flask projects can use blueprints to organize routes and separate responsibilities. Applications can connect to relational databases for persistent storage and can use Flask-CORS when controlled cross-origin browser access is required.
+
+A production-oriented Flask application should protect credentials, validate input, use secure database queries, handle errors consistently, avoid debug mode in production, and maintain automated tests.
